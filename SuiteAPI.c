@@ -1,9 +1,12 @@
 #include "SuiteAPI.h"
 
+#define DEBUG 1
+
 Program *ProgramCreate() {
    Program *p = malloc(sizeof(Program));
    p->name[0] = '\0';
-   p->src[p->idx = 0] = NULL;
+   p->src[p->idxSrc = 0] = NULL;
+   p->header[p->idxHeader = 0] = NULL;
    return p;
 }
 
@@ -12,16 +15,27 @@ void ProgramSetName(Program *p, char *name) {
 }
 
 void ProgramAddSrc(Program *p, char *src) {
-   p->src[p->idx] = malloc(strlen(src) + 1);
-   strcpy(p->src[p->idx], src); 
-   p->src[++p->idx] = NULL;
+   p->src[p->idxSrc] = malloc(strlen(src) + 1);
+   strcpy(p->src[p->idxSrc], src); 
+   p->src[++p->idxSrc] = NULL;
+}
+
+void ProgramAddHeader(Program *p, char *header) {
+   p->header[p->idxHeader] = malloc(strlen(header) + 1);
+   strcpy(p->header[p->idxHeader], header);
+   p->header[++p->idxHeader] = NULL;
 }
 
 void ProgramPrintContents(Program *p) {
    printf("name: %s\n", p->name);
-   printf("src: \n");
 
+   printf("src: \n");
    char **runner = p->src;
+   while (*runner) 
+      printf(" %s\n", *runner++);
+
+   printf("headers: \n");
+   runner = p->header;
    while (*runner) 
       printf(" %s\n", *runner++);
 }
@@ -112,5 +126,43 @@ void printSrArgs(char **args) {
 void makeDirMoveTests(Program *p, Test *tests[], int numTests) {
    char path[DEFAULT_SIZE]; 
    sprintf(path, ".%d", getpid());
-   mkdir(path, 0744);
+   // mkdir(path, 0744);
+
+   int idx;
+   char *files[DEFAULT_SIZE];
+   char **runnerFiles = files;
+   char **runnerSrc = p->src; 
+   char **runnerHeader = p->header;
+
+   while (*runnerSrc) 
+      *runnerFiles++ = *runnerSrc++;
+   while (*runnerHeader) 
+      *runnerFiles++ = *runnerHeader++;
+   for (idx = 0; idx < numTests; idx++) {
+      *runnerFiles++ = tests[idx]->inFile;
+      *runnerFiles++ = tests[idx]->outFile;
+   }
+   *runnerFiles = NULL;
+
+#if DEBUG
+   fprintf(stderr, "files to copy: \n"); 
+   runnerFiles = files;
+   while (*runnerFiles) 
+      fprintf(stderr, "%s\n", *runnerFiles++);
+#endif
+   
+   // TODO copy contents to hidden dir 
+   /*
+   runnerFiles = files;
+   while (*runnerFiles) {
+      int cpid = fork();
+      if (cpid < 0)
+         fprintf(stderr, "Error: Something forked up\n");
+      else if (cpid > 0) {
+         wait(NULL);
+      }
+      else {
+      }
+   }
+   */
 }

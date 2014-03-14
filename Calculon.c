@@ -6,10 +6,16 @@
 #include <sys/stat.h>
 #include "SuiteAPI.h"
 
-#define WORD_SIZE 128
+#define DEFAULT_SIZE 128
+#define MAX_WORD "%127s"
 #define LINE_SIZE 512
 #define MAX_TESTS 128
 #define SAFERUN "./SafeRun"
+
+#define DEBUG 1
+
+/* If pch is null, bad suite definition file. Exit */
+void checkpch(char *pch);
 
 /* Cleans up a Program object |*p| and all the Test objects within the 
 *  container |*tests[]| where the amount of Test objects within the container 
@@ -23,6 +29,7 @@ void teardownProgramTests(Program *p, Test *tests[], int *numTests);
 */
 void runtests(Program *p, Test *tests[], int numTests);
 
+
 int main(int argc, char **argv) {
    // setup
    if (argc != 2) {
@@ -33,11 +40,12 @@ int main(int argc, char **argv) {
 
    FILE *suite = fopen(*++argv, "r");
    if (!suite) {
-      fprintf(stderr, "Suite file could not be found. Exiting.\n");
+      fprintf(stderr, "Error: Suite file could not be found. Exiting.\n");
       exit(1);
    }
 
    char line[LINE_SIZE];
+   char safecopy[DEFAULT_SIZE];
    Program *p = NULL;
    Test *tests[MAX_TESTS];
    int i, numTests = 0;
@@ -47,7 +55,7 @@ int main(int argc, char **argv) {
       char *pch = strtok(line, " \t\n");
 
       if (pch) {
-         if (*pch == 'P') {   // Create Program object
+         if (!strcmp(pch, "P")) {   // Create Program object
             if (p) {
                runtests(p, tests, numTests);
                teardownProgramTests(p, tests, &numTests);
@@ -55,45 +63,64 @@ int main(int argc, char **argv) {
 
             p = ProgramCreate();
             pch = strtok(NULL, " \t\n");
-            ProgramSetName(p, pch); 
+            sscanf(pch, MAX_WORD, safecopy); 
+            ProgramSetName(p, safecopy); 
 
             pch = strtok(NULL, " \t\n");
             while (pch) {
-               if (pch[strlen(pch) - 1] == 'c') 
-                  ProgramAddSrc(p, pch);
+               sscanf(pch, MAX_WORD, safecopy); 
+
+               if (safecopy[strlen(safecopy) - 1] == 'c') 
+                  ProgramAddSrc(p, safecopy);
+               else if (safecopy[strlen(safecopy) - 1] == 'h')
+                  ProgramAddHeader(p, safecopy);
 
                pch = strtok(NULL, " \t\n");
             }
          }
-         else if (*pch == 'T') { // Create Test object
+         else if (!strcmp(pch, "T")) { // Create Test object
             if (!p) {
-               printf("Bad suite file. Exiting\n");
+               fprintf(stderr, "Error: Bad Suite Definition File. Exiting\n");
                exit(1);
             }
             tests[numTests] = TestCreate();
+
             pch = strtok(NULL, " \t\n");
+            checkpch(pch);
+            sscanf(pch, MAX_WORD, safecopy); 
             TestSetInFile(tests[numTests], pch);
+
             pch = strtok(NULL, " \t\n");
+            checkpch(pch);
+            sscanf(pch, MAX_WORD, safecopy); 
             TestSetOutFile(tests[numTests], pch);
+
             pch = strtok(NULL, " \t\n");
+            checkpch(pch);
+            sscanf(pch, MAX_WORD, safecopy); 
             TestSetTimeout(tests[numTests], atoi(pch));
 
             pch = strtok(NULL, " \t\n");
             while (pch) {
+               sscanf(pch, MAX_WORD, safecopy); 
                TestAddArg(tests[numTests], pch);
                pch = strtok(NULL, " \t\n");
             }
 
+#if DEBUG
             ProgramPrintContents(p);
             TestPrintContents(tests[numTests]);
+#endif
             numTests++;
          }
          else {
-            printf("Bad suite file. Exiting\n");
+            fprintf(stderr, "Error: Bad Suite Definition File. Exiting\n");
             exit(1);
          }
 
+#if DEBUG
          printf("\n");
+#endif
       }
    }
 
@@ -103,6 +130,13 @@ int main(int argc, char **argv) {
    fclose(suite);
 
    return 0;
+}
+
+void checkpch(char *pch) {
+   if (!pch) {
+      fprintf(stderr, "Error: Bad Suite Definition File. Exiting\n");
+      exit(1);
+   }
 }
 
 void teardownProgramTests(Program *p, Test *tests[], int *numTests) {
@@ -117,18 +151,23 @@ void teardownProgramTests(Program *p, Test *tests[], int *numTests) {
 void runtests(Program *p, Test *tests[], int numTests) {
    int i;
 
+#if DEBUG
    makeDirMoveTests(p, tests, numTests);
+#endif
 
    for (i = 0; i < numTests; i++) {
       pid_t cpid = fork();
       if (cpid < 0)
-         fprintf(stderr, "Something forked up\n");
+         fprintf(stderr, "Error: Something forked up\n");
       else if (cpid > 0) 
          wait(NULL);
       else {
+#if DEBUG
          printf("\ntest %d\n", i);
-         printSrArgs(buildSrArgs(p, tests, i));
+         char **srArgs = buildSrArgs(p, tests, i);
+         printSrArgs(srArgs);
          // execv(SAFERUN, buildSrArgs(p, tests, i);
+#endif
          exit(0);
       }
    }

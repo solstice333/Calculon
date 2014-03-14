@@ -16,7 +16,9 @@
 typedef struct Program {
    char name[DEFAULT_SIZE];
    char *src[DEFAULT_SIZE];
-   int idx;
+   char *header[DEFAULT_SIZE];
+   int idxSrc;
+   int idxHeader;
 } Program;
 
 /* Test holds the data on the line prefixed with a 'T' in the Suite
@@ -40,6 +42,11 @@ void ProgramSetName(Program *p, char *name);
 *  to use with gcc 
 */
 void ProgramAddSource(Program *p, char *src);
+
+/* Adds header files to the list contained within Program |*p|
+*  to use with gcc
+*/
+void ProgramAddHeader(Program *p, char *header);
 
 /* Prints the contents of Program |*p| */
 void ProgramPrintContents(Program *p);
