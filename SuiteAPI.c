@@ -75,3 +75,42 @@ void TestDelete(Test *t) {
       free(*del++);
    free(t);
 }
+
+char **buildSrArgs(Program *p, Test *tests[], int testNum) {
+   char **args = malloc(DEFAULT_SIZE * sizeof(char *));
+   char **runner = args;
+   char **testArgP = tests[testNum]->args;
+
+   *runner++ = SAFERUN;
+   *runner++ = P30;
+
+   *runner = malloc(DEFAULT_SIZE);
+   sprintf(*runner++, "-t%d", tests[testNum]->timeout);
+
+   *runner = malloc(DEFAULT_SIZE);
+   sprintf(*runner++, "-T%d", MULT * tests[testNum]->timeout);
+
+   *runner = malloc(DEFAULT_SIZE);
+   sprintf(*runner++, "./%s", p->name);
+
+   while (*testArgP) {
+      *runner = malloc(DEFAULT_SIZE);
+      strcpy(*runner++, *testArgP++); 
+   }
+
+   *runner = NULL;
+   return args;
+}
+
+void printSrArgs(char **args) {
+   char **runner = args;
+   while (*runner) 
+      printf("%s ", *runner++);
+   printf("\n");
+}
+
+void makeDirMoveTests(Program *p, Test *tests[], int numTests) {
+   char path[DEFAULT_SIZE]; 
+   sprintf(path, ".%d", getpid());
+   mkdir(path, 0744);
+}

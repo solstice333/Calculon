@@ -1,17 +1,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "SuiteAPI.h"
 
 #define WORD_SIZE 128
 #define LINE_SIZE 512
 #define MAX_TESTS 128
+#define SAFERUN "./SafeRun"
 
-/* cleans up a Program object |p| and all the Test objects within the container
-*  |tests| where the amount of Test objects within the container is tracked by
-*  |*numTests|
+/* Cleans up a Program object |*p| and all the Test objects within the 
+*  container |*tests[]| where the amount of Test objects within the container 
+*  is tracked by |*numTests|. The target pointed to by |*numTests| is reset
+*  to 0.
 */
-void teardownProgramAndTests(Program *p, Test *tests[], int *numTests);
+void teardownProgramTests(Program *p, Test *tests[], int *numTests);
+
+/* Runs the tests |*tests[]| for Program |*p|. |numTests| is the amount of
+*  tests that exist within |*tests[]| 
+*/
+void runtests(Program *p, Test *tests[], int numTests);
 
 int main(int argc, char **argv) {
    // setup
@@ -29,7 +39,7 @@ int main(int argc, char **argv) {
 
    char line[LINE_SIZE];
    Program *p = NULL;
-   Test *t[MAX_TESTS];
+   Test *tests[MAX_TESTS];
    int i, numTests = 0;
 
    // body
@@ -39,9 +49,8 @@ int main(int argc, char **argv) {
       if (pch) {
          if (*pch == 'P') {   // Create Program object
             if (p) {
-               // do tests, teardown, reset
-               printf("Doing tests... Tests done!\n");
-               teardownProgramAndTests(p, t, &numTests);
+               runtests(p, tests, numTests);
+               teardownProgramTests(p, tests, &numTests);
             }
 
             p = ProgramCreate();
@@ -61,22 +70,22 @@ int main(int argc, char **argv) {
                printf("Bad suite file. Exiting\n");
                exit(1);
             }
-            t[numTests] = TestCreate();
+            tests[numTests] = TestCreate();
             pch = strtok(NULL, " \t\n");
-            TestSetInFile(t[numTests], pch);
+            TestSetInFile(tests[numTests], pch);
             pch = strtok(NULL, " \t\n");
-            TestSetOutFile(t[numTests], pch);
+            TestSetOutFile(tests[numTests], pch);
             pch = strtok(NULL, " \t\n");
-            TestSetTimeout(t[numTests], atoi(pch));
+            TestSetTimeout(tests[numTests], atoi(pch));
 
             pch = strtok(NULL, " \t\n");
             while (pch) {
-               TestAddArg(t[numTests], pch);
+               TestAddArg(tests[numTests], pch);
                pch = strtok(NULL, " \t\n");
             }
 
             ProgramPrintContents(p);
-            TestPrintContents(t[numTests]);
+            TestPrintContents(tests[numTests]);
             numTests++;
          }
          else {
@@ -88,19 +97,39 @@ int main(int argc, char **argv) {
       }
    }
 
-   // do tests and teardown
-   printf("Doing tests... Tests done!\n");
-   teardownProgramAndTests(p, t, &numTests);
+   // teardown
+   runtests(p, tests, numTests);
+   teardownProgramTests(p, tests, &numTests);
    fclose(suite);
 
    return 0;
 }
 
-void teardownProgramAndTests(Program *p, Test *tests[], int *numTests) {
+void teardownProgramTests(Program *p, Test *tests[], int *numTests) {
    ProgramDelete(p);
 
    int i;
    for (i = 0; i < *numTests; i++) 
       TestDelete(tests[i]);
    *numTests = 0;
+}
+
+void runtests(Program *p, Test *tests[], int numTests) {
+   int i;
+
+   makeDirMoveTests(p, tests, numTests);
+
+   for (i = 0; i < numTests; i++) {
+      pid_t cpid = fork();
+      if (cpid < 0)
+         fprintf(stderr, "Something forked up\n");
+      else if (cpid > 0) 
+         wait(NULL);
+      else {
+         printf("\ntest %d\n", i);
+         printSrArgs(buildSrArgs(p, tests, i));
+         // execv(SAFERUN, buildSrArgs(p, tests, i);
+         exit(0);
+      }
+   }
 }
