@@ -126,7 +126,7 @@ void printSrArgs(char **args) {
 void makeDirMoveTests(Program *p, Test *tests[], int numTests) {
    char path[DEFAULT_SIZE]; 
    sprintf(path, ".%d", getpid());
-   // mkdir(path, 0744);
+   mkdir(path, 0744);
 
    int idx;
    char *files[DEFAULT_SIZE];
@@ -134,6 +134,7 @@ void makeDirMoveTests(Program *p, Test *tests[], int numTests) {
    char **runnerSrc = p->src; 
    char **runnerHeader = p->header;
 
+   *runnerFiles++ = CP;
    while (*runnerSrc) 
       *runnerFiles++ = *runnerSrc++;
    while (*runnerHeader) 
@@ -142,27 +143,22 @@ void makeDirMoveTests(Program *p, Test *tests[], int numTests) {
       *runnerFiles++ = tests[idx]->inFile;
       *runnerFiles++ = tests[idx]->outFile;
    }
-   *runnerFiles = NULL;
+   *runnerFiles++ = path;
+   *runnerFiles++ = NULL;
 
 #if DEBUG
-   fprintf(stderr, "files to copy: \n"); 
+   fprintf(stderr, "arg list for cp: \n"); 
    runnerFiles = files;
    while (*runnerFiles) 
       fprintf(stderr, "%s\n", *runnerFiles++);
 #endif
    
    // TODO copy contents to hidden dir 
-   /*
-   runnerFiles = files;
-   while (*runnerFiles) {
-      int cpid = fork();
-      if (cpid < 0)
-         fprintf(stderr, "Error: Something forked up\n");
-      else if (cpid > 0) {
-         wait(NULL);
-      }
-      else {
-      }
-   }
-   */
+   int cpid = fork();
+   if (cpid < 0)
+      fprintf(stderr, "Error: Something forked up\n");
+   else if (cpid > 0) 
+      wait(NULL);
+   else 
+      execv(CP, files);
 }

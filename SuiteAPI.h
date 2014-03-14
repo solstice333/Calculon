@@ -4,11 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #define DEFAULT_SIZE 128
 #define MULT 10
 #define P30 "-p30"
 #define SAFERUN "./SafeRun"
+#define CP "/bin/cp"
 
 /* Program holds the data on the line prefixed with a 'P' in the 
 *  Suite Definition File  
