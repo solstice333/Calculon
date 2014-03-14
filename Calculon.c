@@ -7,7 +7,14 @@
 #define LINE_SIZE 512
 #define MAX_TESTS 128
 
+/* cleans up a Program object |p| and all the Test objects within the container
+*  |tests| where the amount of Test objects within the container is tracked by
+*  |*numTests|
+*/
+void teardownProgramAndTests(Program *p, Test *tests[], int *numTests);
+
 int main(int argc, char **argv) {
+   // setup
    if (argc != 2) {
       fprintf(stderr, "Usage: Calculon [Suite file]\n");
       fprintf(stderr, "Where |suite file| is a file" 
@@ -23,15 +30,20 @@ int main(int argc, char **argv) {
    char line[LINE_SIZE];
    Program *p = NULL;
    Test *t[MAX_TESTS];
-   int numTests = 0;
+   int i, numTests = 0;
 
+   // body
    while (fgets(line, LINE_SIZE, suite)) {
       char *pch = strtok(line, " \t\n");
 
       if (pch) {
          if (*pch == 'P') {   // Create Program object
-            // TODO If p != NULL then test the first Program object
-            // Against its Test objects
+            if (p) {
+               // do tests, teardown, reset
+               printf("Doing tests... Tests done!\n");
+               teardownProgramAndTests(p, t, &numTests);
+            }
+
             p = ProgramCreate();
             pch = strtok(NULL, " \t\n");
             ProgramSetName(p, pch); 
@@ -65,19 +77,30 @@ int main(int argc, char **argv) {
 
             ProgramPrintContents(p);
             TestPrintContents(t[numTests]);
-            printf("\n");
             numTests++;
+         }
+         else {
+            printf("Bad suite file. Exiting\n");
+            exit(1);
          }
 
          printf("\n");
       }
    }
 
-   ProgramDelete(p);
-   int i;
-   for (i = 0; i < numTests; i++) 
-      TestDelete(t[i]);
+   // do tests and teardown
+   printf("Doing tests... Tests done!\n");
+   teardownProgramAndTests(p, t, &numTests);
    fclose(suite);
 
    return 0;
+}
+
+void teardownProgramAndTests(Program *p, Test *tests[], int *numTests) {
+   ProgramDelete(p);
+
+   int i;
+   for (i = 0; i < *numTests; i++) 
+      TestDelete(tests[i]);
+   *numTests = 0;
 }
