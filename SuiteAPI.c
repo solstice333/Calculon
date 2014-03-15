@@ -123,8 +123,8 @@ void printSrArgs(char **args) {
    printf("\n");
 }
 
-void makeDirMoveTests(Program *p, Test *tests[], int numTests) {
-   char path[DEFAULT_SIZE]; 
+char *mkDirMvTests(Program *p, Test *tests[], int numTests) {
+   char *path = malloc(DEFAULT_SIZE/2);
    sprintf(path, ".%d", getpid());
    mkdir(path, 0744);
 
@@ -153,12 +153,23 @@ void makeDirMoveTests(Program *p, Test *tests[], int numTests) {
       fprintf(stderr, "%s\n", *runnerFiles++);
 #endif
    
-   // TODO copy contents to hidden dir 
-   int cpid = fork();
+   pid_t cpid = fork();
    if (cpid < 0)
       fprintf(stderr, "Error: Something forked up\n");
    else if (cpid > 0) 
       wait(NULL);
    else 
       execv(CP, files);
+
+   return path;
+}
+
+void rmDirRmTests(char *path) {
+   DIR *dir = opendir(path);
+   dirent direntry;
+
+#if DEBUG
+   while (direntry = readdir(dir)) 
+      fprintf(stderr, "%s\n", direntry->d_name);
+#endif
 }

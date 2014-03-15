@@ -150,11 +150,18 @@ void teardownProgramTests(Program *p, Test *tests[], int *numTests) {
 
 void runtests(Program *p, Test *tests[], int numTests) {
    int i;
+   char *path;
+
+   path = mkDirMvTests(p, tests, numTests);
 
 #if DEBUG
-   makeDirMoveTests(p, tests, numTests);
+   // chdir(path);
+   // runGccMake(p);
+   // chdir("..");
+   rmDirRecurs(path);
 #endif
 
+/*
    for (i = 0; i < numTests; i++) {
       pid_t cpid = fork();
       if (cpid < 0)
@@ -171,4 +178,5 @@ void runtests(Program *p, Test *tests[], int numTests) {
          exit(0);
       }
    }
+*/
 }

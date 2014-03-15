@@ -6,12 +6,16 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <dirent.h>
 
 #define DEFAULT_SIZE 128
 #define MULT 10
 #define P30 "-p30"
 #define SAFERUN "./SafeRun"
 #define CP "/bin/cp"
+
+/* Typedef "struct dirent" with "dirent" */
+typedef struct dirent dirent;
 
 /* Program holds the data on the line prefixed with a 'P' in the 
 *  Suite Definition File  
@@ -95,6 +99,9 @@ void printSrArgs(char **args);
 /* Makes new directory with name being the parent process id of Calculon
 *  and moves all necessary content to that directory for testing
 */
-void makeDirMoveTests(Program *p, Test *tests[], int numTests);
+char *mkDirMvTests(Program *p, Test *tests[], int numTests);
+
+// TODO see dirent.h and readdir
+void rmDirRmTests(char *path);
 
 #endif
