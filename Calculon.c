@@ -158,7 +158,7 @@ void runtests(Program *p, Test *tests[], int numTests) {
    chdir(path);
    runGccMake(p);
    chdir("..");
-   // rmDirRmTests(path);
+   rmDirRmTests(path);
 #endif
 
 /*

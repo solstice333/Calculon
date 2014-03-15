@@ -14,6 +14,7 @@
 #define SAFERUN "./SafeRun"
 #define CP "/bin/cp"
 #define GCC "/usr/bin/gcc"
+#define MAKE "/usr/bin/make"
 
 /* Typedef "struct dirent" with "dirent" */
 typedef struct dirent dirent;

@@ -184,6 +184,28 @@ void rmDirRmTests(char *path) {
    free(path);
 }
 
+/* Returns 1 if makefile exists. Otherwise 0 */
+static int makefileExists() {
+   FILE *mf;
+   int rtn = 0;
+
+   if (mf = fopen("GNUMakefile", "r")) {
+      fclose(mf);
+      rtn = 1;
+   }
+   else if (mf = fopen("makefile", "r")) {
+      fclose(mf);
+      rtn = 1;
+   }
+   else if (mf = fopen("Makefile", "r")) {
+      fclose(mf);
+      rtn = 1;
+   }
+
+   return rtn;
+}
+
+// TODO come back here and implement this
 void runGccMake(Program *p) {
    pid_t cpid = fork();
    if (cpid < 0)
@@ -191,6 +213,12 @@ void runGccMake(Program *p) {
    else if (cpid > 0)
       wait(NULL);
    else {
+      if (makefileExists()) 
+         execl(MAKE, MAKE, NULL);
+          
+
+
+
       char **args = malloc(DEFAULT_SIZE); 
       char **runner = args;
       char **src = p->src;
@@ -200,6 +228,16 @@ void runGccMake(Program *p) {
          *runner++ = *src++;
       *runner = NULL;
 
+#if DEBUG
+      fprintf(stderr, "\nPrinting gcc args list: \n");
+      runner = args;
+      while (*runner) 
+         fprintf(stderr, "%s\n", *runner++);
+      fprintf(stderr, "\n");
+#endif
+
       execv(GCC, args);
+
+
    }
 }
