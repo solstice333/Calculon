@@ -106,4 +106,11 @@ char *mkDirMvTests(Program *p, Test *tests[], int numTests);
 */
 void rmDirRmTests(char *path);
 
+// TODO implement this
+/* Runs gcc on the specified Program |*p| if no makefile exist. Otherwise
+*  runs the makefile. Checks for GNUmakefile, makefile, and Makefile
+*  in that order
+*/
+void runGccMake(Program *p);
+
 #endif

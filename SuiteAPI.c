@@ -42,8 +42,14 @@ void ProgramPrintContents(Program *p) {
 
 void ProgramDelete(Program *p) {
    char **del = p->src;
+
    while(*del)
       free(*del++);
+
+   del = p->header;
+   while (*del)
+      free(*del++);
+
    free(p);
 }
 
@@ -175,4 +181,16 @@ void rmDirRmTests(char *path) {
 
    chdir("..");
    rmdir(path);
+   free(path);
+}
+
+void runGccMake(Program *p) {
+   pid_t cpid = fork();
+   if (cpid < 0)
+      fprintf(stderr, "Error: Something forked up\n");
+   else if (cpid > 0)
+      wait(NULL);
+   else {
+      
+   }
 }

@@ -88,22 +88,22 @@ int main(int argc, char **argv) {
             pch = strtok(NULL, " \t\n");
             checkpch(pch);
             sscanf(pch, MAX_WORD, safecopy); 
-            TestSetInFile(tests[numTests], pch);
+            TestSetInFile(tests[numTests], safecopy);
 
             pch = strtok(NULL, " \t\n");
             checkpch(pch);
             sscanf(pch, MAX_WORD, safecopy); 
-            TestSetOutFile(tests[numTests], pch);
+            TestSetOutFile(tests[numTests], safecopy);
 
             pch = strtok(NULL, " \t\n");
             checkpch(pch);
             sscanf(pch, MAX_WORD, safecopy); 
-            TestSetTimeout(tests[numTests], atoi(pch));
+            TestSetTimeout(tests[numTests], atoi(safecopy));
 
             pch = strtok(NULL, " \t\n");
             while (pch) {
                sscanf(pch, MAX_WORD, safecopy); 
-               TestAddArg(tests[numTests], pch);
+               TestAddArg(tests[numTests], safecopy);
                pch = strtok(NULL, " \t\n");
             }
 
