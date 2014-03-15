@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "SuiteAPI.h"
@@ -10,11 +11,13 @@
 #define MAX_WORD "%127s"
 #define LINE_SIZE 512
 #define MAX_TESTS 128
-#define SAFERUN "./SafeRun"
 
 #define DEBUG 1
 
-/* If pch is null, bad suite definition file. Exit */
+/* If pch (pointer to character) is null, bad suite definition file. In this
+*  case, exit(1) is called. This is necessary to make sure that the suite
+*  definition file contains a test input, test output, and timeout
+*/
 void checkpch(char *pch);
 
 /* Cleans up a Program object |*p| and all the Test objects within the 
@@ -154,29 +157,33 @@ void runtests(Program *p, Test *tests[], int numTests) {
 
    path = mkDirMvTests(p, tests, numTests);
 
-#if DEBUG
    chdir(path);
    runGccMake(p);
-   chdir("..");
-   rmDirRmTests(path);
-#endif
 
-/*
    for (i = 0; i < numTests; i++) {
+      int inFd = open(tests[i]->inFile, O_RDONLY);
+      char outFileK[DEFAULT_SIZE + 2];
+      sprintf(outFileK, "%s.k", tests[i]->outFile);
+      int outFd = creat(outFileK, 0644);
+
       pid_t cpid = fork();
       if (cpid < 0)
          fprintf(stderr, "Error: Something forked up\n");
-      else if (cpid > 0) 
+      else if (cpid > 0) {
+         close(inFd);
+         close(outFd);
          wait(NULL);
+      }
       else {
-#if DEBUG
-         printf("\ntest %d\n", i);
-         char **srArgs = buildSrArgs(p, tests, i);
-         printSrArgs(srArgs);
-         // execv(SAFERUN, buildSrArgs(p, tests, i);
-#endif
-         exit(0);
+         dup2(inFd, 0);
+         close(inFd);
+         dup2(outFd, 1);
+         close(outFd);
+
+         execv(SAFERUN, buildSrArgs(p, tests, i));
       }
    }
-*/
+
+   chdir("..");
+   // rmDirRmTests(path);
 }

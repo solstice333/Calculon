@@ -11,7 +11,10 @@
 #define DEFAULT_SIZE 128
 #define MULT 10
 #define P30 "-p30"
-#define SAFERUN "./SafeRun"
+
+// TODO change this to "/home/grade_cstaley/bin/SafeRun" later
+#define SAFERUN "../SafeRun" 
+
 #define CP "/bin/cp"
 #define GCC "/usr/bin/gcc"
 #define MAKE "/usr/bin/make"
@@ -94,9 +97,6 @@ void TestDelete(Test *t);
 
 /* Build an argument list for the SafeRun executable */
 char **buildSrArgs(Program *p, Test *tests[], int testNum);
-
-/* Prints argument list |**args| */
-void printSrArgs(char **args); 
 
 /* Makes new directory with name being the parent process id of Calculon
 *  and moves all necessary content to that directory for testing

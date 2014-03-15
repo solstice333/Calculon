@@ -30,6 +30,17 @@ static int makefileExists() {
    return rtn;
 }
 
+/* For debugging purposes. Prints out the argument list in |**argsv| 
+*  to stderr with a header intro message |*intromsg| above it. The 
+*  argument list must end with a NULL.
+*/
+static void printArgsv(char **argsv, char *intromsg) {
+   fprintf(stderr, "%s\n", intromsg);
+   while (*argsv) 
+      fprintf(stderr, "%s\n", *argsv++);
+   fprintf(stderr, "\n");
+}
+
 Program *ProgramCreate() {
    Program *p = malloc(sizeof(Program));
    p->name[0] = '\0';
@@ -147,14 +158,12 @@ char **buildSrArgs(Program *p, Test *tests[], int testNum) {
    }
 
    *runner = NULL;
-   return args;
-}
 
-void printSrArgs(char **args) {
-   char **runner = args;
-   while (*runner) 
-      printf("%s ", *runner++);
-   printf("\n");
+#if DEBUG
+   printArgsv(args, "Printing SafeRun args:");
+#endif
+
+   return args;
 }
 
 char *mkDirMvTests(Program *p, Test *tests[], int numTests) {
@@ -190,10 +199,7 @@ char *mkDirMvTests(Program *p, Test *tests[], int numTests) {
    *runnerFiles++ = NULL;
 
 #if DEBUG
-   fprintf(stderr, "arg list for cp: \n"); 
-   runnerFiles = files;
-   while (*runnerFiles) 
-      fprintf(stderr, "%s\n", *runnerFiles++);
+   printArgsv(files, "Arg list for cp:");
 #endif
    
    pid_t cpid = fork();
@@ -241,11 +247,7 @@ void runGccMake(Program *p) {
          *runner = NULL;
 
 #if DEBUG
-         fprintf(stderr, "\nPrinting gcc args list: \n");
-         runner = args;
-         while (*runner) 
-            fprintf(stderr, "%s\n", *runner++);
-         fprintf(stderr, "\n");
+         printArgsv(args, "Printing gcc args list:");
 #endif
 
          execv(GCC, args);

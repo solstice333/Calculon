@@ -2,12 +2,12 @@ CC=gcc
 FLAGS=-g
 FILES=cprog.c 
 OBJ=cprog.o 
-OUT=a.out
+OUT=c.out
 
 all: build
 
 build: $(OBJ)
-	$(CC) $(FLAGS) $(OBJ)
+	$(CC) $(FLAGS) $(OBJ) -o $(OUT)
 
 cprog.o: cprog.c header.h
 	$(CC) $(FLAGS) -c  cprog.c
