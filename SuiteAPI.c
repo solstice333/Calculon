@@ -2,6 +2,34 @@
 
 #define DEBUG 1
 
+const int GNUmakefile = 1;
+const int makefile = 2;
+const int Makefile = 3;
+
+/* Returns the GNUMakefile constant if GNUMakefile exists, makefile constant
+*  if makefile exists, and the Makefile constant if Makefile exists.
+*  Returns 0 otherwise. 
+*/
+static int makefileExists() {
+   FILE *mf;
+   int rtn = 0;
+
+   if (mf = fopen("GNUmakefile", "r")) {
+      fclose(mf);
+      rtn = GNUmakefile;
+   }
+   else if (mf = fopen("makefile", "r")) {
+      fclose(mf);
+      rtn = makefile;
+   }
+   else if (mf = fopen("Makefile", "r")) {
+      fclose(mf);
+      rtn = Makefile;
+   }
+
+   return rtn;
+}
+
 Program *ProgramCreate() {
    Program *p = malloc(sizeof(Program));
    p->name[0] = '\0';
@@ -149,6 +177,15 @@ char *mkDirMvTests(Program *p, Test *tests[], int numTests) {
       *runnerFiles++ = tests[idx]->inFile;
       *runnerFiles++ = tests[idx]->outFile;
    }
+
+   int mf = makefileExists();
+   if (mf == GNUmakefile)
+      *runnerFiles++ = "GNUmakefile";   
+   else if (mf == makefile)
+      *runnerFiles++ = "makefile";
+   else if (mf == Makefile)
+      *runnerFiles++ = "Makefile";
+
    *runnerFiles++ = path;
    *runnerFiles++ = NULL;
 
@@ -184,28 +221,6 @@ void rmDirRmTests(char *path) {
    free(path);
 }
 
-/* Returns 1 if makefile exists. Otherwise 0 */
-static int makefileExists() {
-   FILE *mf;
-   int rtn = 0;
-
-   if (mf = fopen("GNUMakefile", "r")) {
-      fclose(mf);
-      rtn = 1;
-   }
-   else if (mf = fopen("makefile", "r")) {
-      fclose(mf);
-      rtn = 1;
-   }
-   else if (mf = fopen("Makefile", "r")) {
-      fclose(mf);
-      rtn = 1;
-   }
-
-   return rtn;
-}
-
-// TODO come back here and implement this
 void runGccMake(Program *p) {
    pid_t cpid = fork();
    if (cpid < 0)
@@ -215,29 +230,25 @@ void runGccMake(Program *p) {
    else {
       if (makefileExists()) 
          execl(MAKE, MAKE, NULL);
-          
+      else {
+         char **args = malloc(DEFAULT_SIZE); 
+         char **runner = args;
+         char **src = p->src;
 
-
-
-      char **args = malloc(DEFAULT_SIZE); 
-      char **runner = args;
-      char **src = p->src;
-
-      *runner++ = GCC;
-      while (*src) 
-         *runner++ = *src++;
-      *runner = NULL;
+         *runner++ = GCC;
+         while (*src) 
+            *runner++ = *src++;
+         *runner = NULL;
 
 #if DEBUG
-      fprintf(stderr, "\nPrinting gcc args list: \n");
-      runner = args;
-      while (*runner) 
-         fprintf(stderr, "%s\n", *runner++);
-      fprintf(stderr, "\n");
+         fprintf(stderr, "\nPrinting gcc args list: \n");
+         runner = args;
+         while (*runner) 
+            fprintf(stderr, "%s\n", *runner++);
+         fprintf(stderr, "\n");
 #endif
 
-      execv(GCC, args);
-
-
+         execv(GCC, args);
+      }
    }
 }
