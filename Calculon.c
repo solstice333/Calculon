@@ -155,10 +155,10 @@ void runtests(Program *p, Test *tests[], int numTests) {
    path = mkDirMvTests(p, tests, numTests);
 
 #if DEBUG
-   // chdir(path);
+   chdir(path);
    // runGccMake(p);
-   // chdir("..");
-   rmDirRecurs(path);
+   chdir("..");
+   rmDirRmTests(path);
 #endif
 
 /*

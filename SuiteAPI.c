@@ -165,11 +165,15 @@ char *mkDirMvTests(Program *p, Test *tests[], int numTests) {
 }
 
 void rmDirRmTests(char *path) {
-   DIR *dir = opendir(path);
-   dirent direntry;
+   chdir(path);
+   DIR *dir = opendir(".");
+   dirent *direntry;
 
-#if DEBUG
+   fprintf(stderr, "\nDeleting files in directory %s\n", path);
    while (direntry = readdir(dir)) 
-      fprintf(stderr, "%s\n", direntry->d_name);
-#endif
+      remove(direntry->d_name);
+   closedir(dir);
+
+   chdir("..");
+   rmdir(path);
 }
