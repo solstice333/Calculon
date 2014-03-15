@@ -101,7 +101,9 @@ void printSrArgs(char **args);
 */
 char *mkDirMvTests(Program *p, Test *tests[], int numTests);
 
-// TODO see dirent.h and readdir
+/* Removes the directory specified by |*path| and all of its contents.
+*  The contents must be files, not directories
+*/
 void rmDirRmTests(char *path);
 
 #endif

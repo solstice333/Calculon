@@ -169,7 +169,6 @@ void rmDirRmTests(char *path) {
    DIR *dir = opendir(".");
    dirent *direntry;
 
-   fprintf(stderr, "\nDeleting files in directory %s\n", path);
    while (direntry = readdir(dir)) 
       remove(direntry->d_name);
    closedir(dir);
