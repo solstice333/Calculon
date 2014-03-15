@@ -191,6 +191,15 @@ void runGccMake(Program *p) {
    else if (cpid > 0)
       wait(NULL);
    else {
-      
+      char **args = malloc(DEFAULT_SIZE); 
+      char **runner = args;
+      char **src = p->src;
+
+      *runner++ = GCC;
+      while (*src) 
+         *runner++ = *src++;
+      *runner = NULL;
+
+      execv(GCC, args);
    }
 }

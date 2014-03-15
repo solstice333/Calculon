@@ -13,6 +13,7 @@
 #define P30 "-p30"
 #define SAFERUN "./SafeRun"
 #define CP "/bin/cp"
+#define GCC "/usr/bin/gcc"
 
 /* Typedef "struct dirent" with "dirent" */
 typedef struct dirent dirent;

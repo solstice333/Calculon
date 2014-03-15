@@ -156,9 +156,9 @@ void runtests(Program *p, Test *tests[], int numTests) {
 
 #if DEBUG
    chdir(path);
-   // runGccMake(p);
+   runGccMake(p);
    chdir("..");
-   rmDirRmTests(path);
+   // rmDirRmTests(path);
 #endif
 
 /*
