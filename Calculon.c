@@ -5,7 +5,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "SuiteAPI.h"
+#include "RunSuite.h"
 
 #define DEFAULT_SIZE 128
 #define MAX_WORD "%127s"

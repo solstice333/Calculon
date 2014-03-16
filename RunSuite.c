@@ -1,4 +1,4 @@
-#include "SuiteAPI.h"
+#include "RunSuite.h"
 
 #define DEBUG 0
 
