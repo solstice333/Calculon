@@ -18,6 +18,11 @@
 #define CP "/bin/cp"
 #define GCC "/usr/bin/gcc"
 #define MAKE "/usr/bin/make"
+#define W 1
+#define R 0
+#define BUFSIZE 1024
+#define TARGET 9
+#define MAKE_FAIL 2
 
 /* Typedef "struct dirent" with "dirent" */
 typedef struct dirent dirent;
@@ -108,10 +113,11 @@ char *mkDirMvTests(Program *p, Test *tests[], int numTests);
 */
 void rmDirRmTests(char *path);
 
-/* Runs gcc on the specified Program |*p| if no makefile exist. Otherwise
-*  runs the makefile. Checks for GNUmakefile, makefile, and Makefile
-*  in that order
+/* Runs Make for Program |*p| to be tested. If no makefile exists, runs
+*  gcc for |*p| instead. Checks for GNUmakefile, makefile, and Makefile
+*  in that order. Returns a nonzero value if Make has failed and an error
+*  message to stderr. Returns 0 if successful.
 */
-void runGccMake(Program *p);
+int runGccMake(Program *p);
 
 #endif

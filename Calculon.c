@@ -11,6 +11,7 @@
 #define MAX_WORD "%127s"
 #define LINE_SIZE 512
 #define MAX_TESTS 128
+#define DELIM " \t\n"
 
 #define DEBUG 1
 
@@ -55,7 +56,7 @@ int main(int argc, char **argv) {
 
    // body
    while (fgets(line, LINE_SIZE, suite)) {
-      char *pch = strtok(line, " \t\n");
+      char *pch = strtok(line, DELIM);
 
       if (pch) {
          if (!strcmp(pch, "P")) {   // Create Program object
@@ -65,11 +66,11 @@ int main(int argc, char **argv) {
             }
 
             p = ProgramCreate();
-            pch = strtok(NULL, " \t\n");
+            pch = strtok(NULL, DELIM);
             sscanf(pch, MAX_WORD, safecopy); 
             ProgramSetName(p, safecopy); 
 
-            pch = strtok(NULL, " \t\n");
+            pch = strtok(NULL, DELIM);
             while (pch) {
                sscanf(pch, MAX_WORD, safecopy); 
 
@@ -78,7 +79,7 @@ int main(int argc, char **argv) {
                else if (safecopy[strlen(safecopy) - 1] == 'h')
                   ProgramAddHeader(p, safecopy);
 
-               pch = strtok(NULL, " \t\n");
+               pch = strtok(NULL, DELIM);
             }
          }
          else if (!strcmp(pch, "T")) { // Create Test object
@@ -88,26 +89,26 @@ int main(int argc, char **argv) {
             }
             tests[numTests] = TestCreate();
 
-            pch = strtok(NULL, " \t\n");
+            pch = strtok(NULL, DELIM);
             checkpch(pch);
             sscanf(pch, MAX_WORD, safecopy); 
             TestSetInFile(tests[numTests], safecopy);
 
-            pch = strtok(NULL, " \t\n");
+            pch = strtok(NULL, DELIM);
             checkpch(pch);
             sscanf(pch, MAX_WORD, safecopy); 
             TestSetOutFile(tests[numTests], safecopy);
 
-            pch = strtok(NULL, " \t\n");
+            pch = strtok(NULL, DELIM);
             checkpch(pch);
             sscanf(pch, MAX_WORD, safecopy); 
             TestSetTimeout(tests[numTests], atoi(safecopy));
 
-            pch = strtok(NULL, " \t\n");
+            pch = strtok(NULL, DELIM);
             while (pch) {
                sscanf(pch, MAX_WORD, safecopy); 
                TestAddArg(tests[numTests], safecopy);
-               pch = strtok(NULL, " \t\n");
+               pch = strtok(NULL, DELIM);
             }
 
 #if DEBUG
@@ -158,32 +159,35 @@ void runtests(Program *p, Test *tests[], int numTests) {
    path = mkDirMvTests(p, tests, numTests);
 
    chdir(path);
-   runGccMake(p);
-
-   for (i = 0; i < numTests; i++) {
-      int inFd = open(tests[i]->inFile, O_RDONLY);
-      char outFileK[DEFAULT_SIZE + 2];
-      sprintf(outFileK, "%s.k", tests[i]->outFile);
-      int outFd = creat(outFileK, 0644);
-
-      pid_t cpid = fork();
-      if (cpid < 0)
-         fprintf(stderr, "Error: Something forked up\n");
-      else if (cpid > 0) {
-         close(inFd);
-         close(outFd);
-         wait(NULL);
-      }
-      else {
-         dup2(inFd, 0);
-         close(inFd);
-         dup2(outFd, 1);
-         close(outFd);
-
-         execv(SAFERUN, buildSrArgs(p, tests, i));
-      }
+   if (runGccMake(p) != 0) {
+      chdir(".."); 
+      rmDirRmTests(path);
    }
+   else {
+      for (i = 0; i < numTests; i++) {
+         int inFd = open(tests[i]->inFile, O_RDONLY);
+         char outFileK[DEFAULT_SIZE + 2];
+         sprintf(outFileK, "%s.k", tests[i]->outFile);
+         int outFd = creat(outFileK, 0644);
 
-   chdir("..");
-   // rmDirRmTests(path);
+         pid_t cpid = fork();
+         if (cpid < 0)
+            fprintf(stderr, "Error: Something forked up\n");
+         else if (cpid > 0) {
+            close(inFd);
+            close(outFd);
+            wait(NULL);
+         }
+         else {
+            dup2(inFd, 0);
+            close(inFd);
+            dup2(outFd, 1);
+            close(outFd);
+
+            execv(SAFERUN, buildSrArgs(p, tests, i));
+         }
+      }
+      chdir("..");
+      rmDirRmTests(path);
+   }
 }

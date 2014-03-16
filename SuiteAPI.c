@@ -1,31 +1,34 @@
 #include "SuiteAPI.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 const int GNUmakefile = 1;
 const int makefile = 2;
 const int Makefile = 3;
 
+/* Returns 1 if |*filename| exists. Returns 0 otherwise. */
+static int fileExists(char *filename) {
+   FILE *file;
+   if (file = fopen(filename, "r")) {
+      fclose(file);
+      return 1;
+   }
+   return 0;
+}
+
 /* Returns the GNUMakefile constant if GNUMakefile exists, makefile constant
 *  if makefile exists, and the Makefile constant if Makefile exists.
-*  Returns 0 otherwise. 
+*  Returns 0 otherwise, if no makefile exists. 
 */
 static int makefileExists() {
-   FILE *mf;
    int rtn = 0;
 
-   if (mf = fopen("GNUmakefile", "r")) {
-      fclose(mf);
+   if (fileExists("GNUmakefile"))
       rtn = GNUmakefile;
-   }
-   else if (mf = fopen("makefile", "r")) {
-      fclose(mf);
+   else if (fileExists("makefile"))
       rtn = makefile;
-   }
-   else if (mf = fopen("Makefile", "r")) {
-      fclose(mf);
+   else if (fileExists("Makefile"))
       rtn = Makefile;
-   }
 
    return rtn;
 }
@@ -39,6 +42,23 @@ static void printArgsv(char **argsv, char *intromsg) {
    while (*argsv) 
       fprintf(stderr, "%s\n", *argsv++);
    fprintf(stderr, "\n");
+}
+
+/* This helper function is called when Make returns a value of 2 in which
+*  make has failed due to a nonexistent target needed by a dependency. The
+*  error message is piped to the parent and the parent calls badMake() to
+*  print out |msg[]| to stderr and the failed build line
+*/
+static void badMake(char msg[]) {
+   fprintf(stderr, "%s", msg);
+
+   int idx;
+   char *delim = " *,'`\t\n";
+   char *pch = strtok(msg, delim);
+
+   for (idx = 0; idx < TARGET; idx++) 
+      pch = strtok(NULL, delim);
+   fprintf(stderr, "Failed:  %s\n", pch);
 }
 
 Program *ProgramCreate() {
@@ -178,8 +198,17 @@ char *mkDirMvTests(Program *p, Test *tests[], int numTests) {
    char **runnerHeader = p->header;
 
    *runnerFiles++ = CP;
-   while (*runnerSrc) 
+
+   while (*runnerSrc) {
+      if (!fileExists(*runnerSrc)) {
+         fprintf(stderr, 
+          "Could not find required test file '%s'\n", *runnerSrc);
+         rmdir(path);
+         exit(1);
+      }
       *runnerFiles++ = *runnerSrc++;
+   }
+
    while (*runnerHeader) 
       *runnerFiles++ = *runnerHeader++;
    for (idx = 0; idx < numTests; idx++) {
@@ -227,16 +256,44 @@ void rmDirRmTests(char *path) {
    free(path);
 }
 
-void runGccMake(Program *p) {
+int runGccMake(Program *p) {
+   int fd[2];
+   pipe(fd);   
+
    pid_t cpid = fork();
    if (cpid < 0)
       fprintf(stderr, "Error: Something forked up\n");
-   else if (cpid > 0)
-      wait(NULL);
+   else if (cpid > 0) {
+      int status;
+      close(fd[W]);
+      if (!makefileExists())
+         close(fd[R]);
+      wait(&status);
+
+      if (WEXITSTATUS(status) == MAKE_FAIL) {
+         char *buf = calloc(BUFSIZE, sizeof(char));
+         read(fd[R], buf, BUFSIZE);
+         badMake(buf);
+         free(buf);
+         return 1;
+      }
+   }
    else {
-      if (makefileExists()) 
+      if (makefileExists()) {
+#if DEBUG
+         fprintf(stderr, "Running make!\n");
+#endif
+         close(fd[R]);   
+         dup2(fd[W], 2);
+         close(fd[W]);
          execl(MAKE, MAKE, NULL);
+      }
       else {
+         close(fd[W]);
+         close(fd[R]);
+#if DEBUG
+         fprintf(stderr, "Running gcc!\n");
+#endif
          char **args = malloc(DEFAULT_SIZE); 
          char **runner = args;
          char **src = p->src;
@@ -253,4 +310,6 @@ void runGccMake(Program *p) {
          execv(GCC, args);
       }
    }
+
+   return 0;
 }
