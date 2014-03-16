@@ -58,7 +58,7 @@ static void badMake(char msg[]) {
 
    for (idx = 0; idx < TARGET; idx++) 
       pch = strtok(NULL, delim);
-   fprintf(stderr, "Failed:  %s\n", pch);
+   fprintf(stderr, "Failed: %s\n", pch);
 }
 
 Program *ProgramCreate() {
@@ -286,6 +286,8 @@ int runGccMake(Program *p) {
          close(fd[R]);   
          dup2(fd[W], 2);
          close(fd[W]);
+
+         pipeGarbage(1);
          execl(MAKE, MAKE, NULL);
       }
       else {
@@ -340,4 +342,17 @@ void printFailure(char *name, int tnum, Failure *fl) {
       }
       fprintf(stderr, "\n");
    }
+}
+
+void printSuccess(char *name, int totalFailures, int totalTests) {
+   if (!totalFailures)
+      fprintf(stderr, "%s %d of %d tests passed.\n", name, 
+       totalTests, totalTests);
+}
+
+void pipeGarbage(int fd) {
+   int garbage[2];
+   pipe(garbage);
+   dup2(garbage[W], fd);
+   close(garbage[W]);
 }

@@ -51,7 +51,8 @@ typedef struct Test {
 } Test;
 
 /* Struct for holding data related to cases involving failure output or 
-*  failure exit status' (excluding build failures associating to gcc or Make)
+*  failure exit status' for SafeRun and/or diff (excluding build failures 
+*  associating to gcc or Make)
 */
 typedef struct Failure {
    int fail;
@@ -129,7 +130,23 @@ void rmDirRmTests(char *path);
 */
 int runGccMake(Program *p);
 
-// TODO description here
+/* Prints failure messages for program |*name| that's being tested at test
+*  iteration |tnum| with the given Failure object |*fail| that contains
+*  failure data as defined in the Failure struct at the top of this header 
+*  file
+*/
 void printFailure(char *name, int tnum, Failure *fail);
+
+/* Prints success message for program |*name| that's being tested if
+*  the total number of failures throughout the tests |totalFailures| is 0. 
+*  |totalTests| contain the maximum number of tests that was done for 
+*  program |*name|.
+*/
+void printSuccess(char *name, int totalFailures, int totalTests);
+
+/* Silence messages written to |fd| from programs called using exec where
+*  |fd| is usually stdout (1) or stderr (2)
+*/
+void pipeGarbage(int fd);
 
 #endif

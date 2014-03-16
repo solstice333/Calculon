@@ -164,6 +164,8 @@ void runtests(Program *p, Test *tests[], int numTests) {
       rmDirRmTests(path);
    }
    else {
+      int totalFailures = 0;
+
       for (i = 0; i < numTests; i++) {
          int status, srRtn;
          int inFd, outFd;
@@ -188,26 +190,30 @@ void runtests(Program *p, Test *tests[], int numTests) {
             dup2(outFd, 1);
             close(outFd);
 
-            int garbage[2];
-            pipe(garbage);
-            dup2(garbage[W], 2);
-
+            pipeGarbage(2);
             execv(SAFERUN, buildSrArgs(p, tests, i));
          }
 
          srRtn = WEXITSTATUS(status); 
-         if (srRtn < SR_ERROR || srRtn > SR_ERROR + 1) {
+         if (srRtn < SR_ERROR && srRtn != 0 || srRtn > SR_ERROR + 1) {
             failure.runtime = 1;
             ++failure.fail;
+            ++totalFailures;
          }
          if (srRtn > SR_ERROR && srRtn % 2) {
             failure.timeout = 1;
             ++failure.fail;
+            ++totalFailures;
          }
 
-         // TODO print failure messages here
+         // TODO exec diff here
+
+
+
          printFailure(p->name, i, &failure);
       }
+
+      printSuccess(p->name, totalFailures, numTests);
       chdir("..");
       rmDirRmTests(path);
    }
