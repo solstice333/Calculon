@@ -1,0 +1,11 @@
+P a.out aprog.c header.h
+T test1.in test1.out 1000 -a -b -c
+T test2.in test2.out 1000 -xyz
+T test3.in test3.out 800
+P b.out bprog.c
+T test4.in test4.out 10000
+T test5.in test5.out 30000 -verbose
+P c.out cprog.c header.h
+T test6.in test6.out 1000 -a -b -c
+T test7.in test7.out 1000 -xyz
+T test8.in test8.out 800

@@ -1,0 +1,2 @@
+P f.out fprog.c SmartAlloc.c SmartAlloc.h
+T test1.in test1.out 10000
