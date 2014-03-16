@@ -1,6 +1,6 @@
 #!/bin/bash
 
-vg=false
+vg=true
 
 ./cleanAllTests.sh
 make -f mfCalculon rebuild
@@ -74,6 +74,16 @@ if $vg; then
    valgrind ./a.out SuiteG.suite
 else
    ./a.out SuiteG.suite
+   echo -e "Return value: $?"
+fi
+./cleanAllTests.sh
+
+echo -e "\nTESTH - multiple tests. Edge cases fail (A - test1, C - test3)\n"
+cp Tests/hprog/* .
+if $vg; then
+   valgrind ./a.out SuiteH.suite
+else
+   ./a.out SuiteH.suite
    echo -e "Return value: $?"
 fi
 ./cleanAllTests.sh
