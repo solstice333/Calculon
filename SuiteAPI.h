@@ -145,8 +145,9 @@ void printFailure(char *name, int tnum, Failure *fail);
 void printSuccess(char *name, int totalFailures, int totalTests);
 
 /* Silence messages written to |fd| from programs called using exec where
-*  |fd| is usually stdout (1) or stderr (2)
+*  |fd| is usually stdout (1) or stderr (2) - whichever stream you want to
+*  silence
 */
-void pipeGarbage(int fd);
+void silence(int fd);
 
 #endif

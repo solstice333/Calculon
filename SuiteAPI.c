@@ -287,7 +287,7 @@ int runGccMake(Program *p) {
          dup2(fd[W], 2);
          close(fd[W]);
 
-         pipeGarbage(1);
+         silence(1);
          execl(MAKE, MAKE, NULL);
       }
       else {
@@ -350,7 +350,7 @@ void printSuccess(char *name, int totalFailures, int totalTests) {
        totalTests, totalTests);
 }
 
-void pipeGarbage(int fd) {
+void silence(int fd) {
    int garbage[2];
    pipe(garbage);
    dup2(garbage[W], fd);

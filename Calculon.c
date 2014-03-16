@@ -190,7 +190,7 @@ void runtests(Program *p, Test *tests[], int numTests) {
             dup2(outFd, 1);
             close(outFd);
 
-            pipeGarbage(2);
+            silence(2);
             execv(SAFERUN, buildSrArgs(p, tests, i));
          }
 
@@ -207,7 +207,7 @@ void runtests(Program *p, Test *tests[], int numTests) {
          }
 
          // TODO exec diff here
-
+         
 
 
          printFailure(p->name, i, &failure);
