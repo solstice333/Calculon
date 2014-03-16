@@ -12,8 +12,9 @@
 #define LINE_SIZE 512
 #define MAX_TESTS 128
 #define DELIM " \t\n"
+#define SR_ERROR 192
 
-#define DEBUG 1
+#define DEBUG 0
 
 /* If pch (pointer to character) is null, bad suite definition file. In this
 *  case, exit(1) is called. This is necessary to make sure that the suite
@@ -32,7 +33,6 @@ void teardownProgramTests(Program *p, Test *tests[], int *numTests);
 *  tests that exist within |*tests[]| 
 */
 void runtests(Program *p, Test *tests[], int numTests);
-
 
 int main(int argc, char **argv) {
    // setup
@@ -165,10 +165,14 @@ void runtests(Program *p, Test *tests[], int numTests) {
    }
    else {
       for (i = 0; i < numTests; i++) {
-         int inFd = open(tests[i]->inFile, O_RDONLY);
+         int status, srRtn;
+         int inFd, outFd;
          char outFileK[DEFAULT_SIZE + 2];
+         Failure failure = { 0, 0, 0, 0 };
+         
+         inFd = open(tests[i]->inFile, O_RDONLY);
          sprintf(outFileK, "%s.k", tests[i]->outFile);
-         int outFd = creat(outFileK, 0644);
+         outFd = creat(outFileK, 0644);
 
          pid_t cpid = fork();
          if (cpid < 0)
@@ -176,7 +180,7 @@ void runtests(Program *p, Test *tests[], int numTests) {
          else if (cpid > 0) {
             close(inFd);
             close(outFd);
-            wait(NULL);
+            wait(&status);
          }
          else {
             dup2(inFd, 0);
@@ -184,8 +188,25 @@ void runtests(Program *p, Test *tests[], int numTests) {
             dup2(outFd, 1);
             close(outFd);
 
+            int garbage[2];
+            pipe(garbage);
+            dup2(garbage[W], 2);
+
             execv(SAFERUN, buildSrArgs(p, tests, i));
          }
+
+         srRtn = WEXITSTATUS(status); 
+         if (srRtn < SR_ERROR || srRtn > SR_ERROR + 1) {
+            failure.runtime = 1;
+            ++failure.fail;
+         }
+         if (srRtn > SR_ERROR && srRtn % 2) {
+            failure.timeout = 1;
+            ++failure.fail;
+         }
+
+         // TODO print failure messages here
+         printFailure(p->name, i, &failure);
       }
       chdir("..");
       rmDirRmTests(path);

@@ -301,6 +301,8 @@ int runGccMake(Program *p) {
          *runner++ = GCC;
          while (*src) 
             *runner++ = *src++;
+         *runner++ = OUTPUT_OPT;
+         *runner++ = p->name;
          *runner = NULL;
 
 #if DEBUG
@@ -312,4 +314,30 @@ int runGccMake(Program *p) {
    }
 
    return 0;
+}
+
+void printFailure(char *name, int tnum, Failure *fl) {
+   if (fl->fail) {
+      fprintf(stderr, "%s test %d failed:", name, tnum);
+      while (fl->fail) {
+         if (fl->diff) {
+            fprintf(stderr, " diff failure");
+            fl->diff = 0;
+         }
+         else if (fl->runtime) {
+            fprintf(stderr, " runtime error");
+            fl->runtime = 0;
+         }
+         else {
+            fprintf(stderr, " timeout");
+            fl->timeout = 0;
+         }
+
+         if (fl->fail > 1)
+            fprintf(stderr, ",");
+
+         --fl->fail;
+      }
+      fprintf(stderr, "\n");
+   }
 }

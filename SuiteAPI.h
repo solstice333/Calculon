@@ -18,6 +18,7 @@
 #define CP "/bin/cp"
 #define GCC "/usr/bin/gcc"
 #define MAKE "/usr/bin/make"
+#define OUTPUT_OPT "-o"
 #define W 1
 #define R 0
 #define BUFSIZE 1024
@@ -48,6 +49,14 @@ typedef struct Test {
    char *args[DEFAULT_SIZE];
    int idx;
 } Test;
+
+/* Struct for holding data related to cases involving failure output or 
+*  failure exit status' (excluding build failures associating to gcc or Make)
+*/
+typedef struct Failure {
+   int fail;
+   int diff, runtime, timeout;
+} Failure;
 
 /* Initializes a Program object */
 Program *ProgramCreate();
@@ -119,5 +128,8 @@ void rmDirRmTests(char *path);
 *  message to stderr. Returns 0 if successful.
 */
 int runGccMake(Program *p);
+
+// TODO description here
+void printFailure(char *name, int tnum, Failure *fail);
 
 #endif
