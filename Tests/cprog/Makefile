@@ -4,7 +4,7 @@ FILES=cprog.c
 OBJ=cprog.o 
 OUT=c.out
 
-all: build
+c.out: build
 
 build: $(OBJ)
 	$(CC) $(FLAGS) $(OBJ) -o $(OUT)

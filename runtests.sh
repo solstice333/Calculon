@@ -1,6 +1,6 @@
 #!/bin/bash
 
-vg=true
+vg=false
 
 ./cleanAllTests.sh
 make -f mfCalculon rebuild

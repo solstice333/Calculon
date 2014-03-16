@@ -44,23 +44,6 @@ static void printArgsv(char **argsv, char *intromsg) {
    fprintf(stderr, "\n");
 }
 
-/* This helper function is called when Make returns a value of 2 in which
-*  make has failed due to a nonexistent target needed by a dependency. The
-*  error message is piped to the parent and the parent calls badMake() to
-*  print out |msg[]| to stderr and the failed build line
-*/
-static void badMake(char msg[]) {
-   fprintf(stderr, "%s", msg);
-
-   int idx;
-   char *delim = " *,'`\t\n";
-   char *pch = strtok(msg, delim);
-
-   for (idx = 0; idx < TARGET; idx++) 
-      pch = strtok(NULL, delim);
-   fprintf(stderr, "Failed: %s\n", pch);
-}
-
 Program *ProgramCreate() {
    Program *p = malloc(sizeof(Program));
    p->name[0] = '\0';
@@ -273,7 +256,10 @@ int runGccMake(Program *p) {
       if (WEXITSTATUS(status) == MAKE_FAIL) {
          char *buf = calloc(BUFSIZE, sizeof(char));
          read(fd[R], buf, BUFSIZE);
-         badMake(buf);
+
+         fprintf(stderr, "%s", buf);
+         fprintf(stderr, "Failed: %s\n", p->name);
+
          free(buf);
          return 1;
       }
@@ -288,7 +274,7 @@ int runGccMake(Program *p) {
          close(fd[W]);
 
          silence(1);
-         execl(MAKE, MAKE, NULL);
+         execl(MAKE, MAKE, p->name, NULL);
       }
       else {
          close(fd[W]);

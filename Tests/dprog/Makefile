@@ -4,9 +4,9 @@ FILES=dprog.c
 OBJ=dprog.o 
 OUT=a.out
 
-a.out: main.c
+dd.out: main.c
 
-fdksjl: $(OBJ)
+dsjfd.c: $(OBJ)
 	$(CC) $(FLAGS) $(OBJ)
 
 dprog.o: dprog.c header.h
