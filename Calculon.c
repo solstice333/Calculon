@@ -167,7 +167,7 @@ void runtests(Program *p, Test *tests[], int numTests) {
       int totalFailures = 0;
 
       for (i = 0; i < numTests; i++) {
-         int status, srRtn;
+         int status, srRtn, diffRtn;
          int inFd, outFd;
          char outFileK[DEFAULT_SIZE + 2];
          Failure failure = { 0, 0, 0, 0 };
@@ -206,20 +206,24 @@ void runtests(Program *p, Test *tests[], int numTests) {
             ++totalFailures;
          }
 
-         // TODO exec diff here
-         /*
          cpid = fork();
          if (cpid < 0)
             fprintf(stderr, "Error: Something forked up\n");
          else if (cpid > 0)
             wait(&status);
-         else {
-            execv(DIFF, buildDiffArgs(
+         else { 
+            silence(1);
+            execv(DIFF, buildDiffArgs(outFileK, tests[i]->outFile));
          }
-         */
+         
+         diffRtn = WEXITSTATUS(status);
+         if (diffRtn) {
+            failure.diff = 1;
+            ++failure.fail;
+            ++totalFailures;
+         }
 
-
-         printFailure(p->name, i, &failure);
+         printFailure(p->name, i + 1, &failure);
       }
 
       printSuccess(p->name, totalFailures, numTests);

@@ -1,4 +1,4 @@
-// all 3 tests pass (gcc) (one source file)
+// test 2 and 3 diff failure
 #include <stdio.h>
 #include "header.h"
 

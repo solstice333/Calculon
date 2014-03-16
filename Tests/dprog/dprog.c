@@ -1,3 +1,4 @@
+// make failure, no target for dependency, bad make
 #include <stdio.h>
 #include "header.h"
 

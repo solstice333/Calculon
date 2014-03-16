@@ -367,5 +367,18 @@ void checkOpenFds(int n) {
 }
 
 // TODO finish implementing this
-void buildDiffArgs(char *act, char *exp) {
+char **buildDiffArgs(char *act, char *exp) {
+   char **args = malloc(DEFAULT_SIZE * sizeof(char *));
+   char **runner = args;
+
+   *runner++ = DIFF;
+   *runner++ = act;
+   *runner++ = exp;
+   *runner++ = NULL;
+
+#if DEBUG
+   printArgsv(args, "DiffArgs:");
+#endif
+
+   return args;
 }

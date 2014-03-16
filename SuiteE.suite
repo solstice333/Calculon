@@ -1,2 +1,2 @@
 P e.out eprog.c header.h
-T test1.in test1.out 5000 -a -b -c
+T test1.in test1.out 750 -a -b -c

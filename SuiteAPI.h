@@ -163,6 +163,6 @@ void checkOpenFds(int n);
 *  redirects its stdout to the actual output file |*act|. Likewise, |*exp| is 
 *  the name of the expected output file to be diff'ed against. 
 */
-void buildDiffArgs(char *act, char *exp);
+char **buildDiffArgs(char *act, char *exp);
 
 #endif

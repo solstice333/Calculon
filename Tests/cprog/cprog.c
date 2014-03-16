@@ -1,3 +1,4 @@
+// all 1 tests pass (Makefile)
 #include <stdio.h>
 #include "header.h"
 

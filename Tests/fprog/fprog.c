@@ -1,4 +1,4 @@
-// all 2 tests pass (gcc) (multiple source files)
+// missing source file, hard exit - intended memory leaks
 #include <stdio.h>
 #include "SmartAlloc.h"
 
