@@ -258,7 +258,7 @@ int runGccMake(Program *p) {
          read(fd[R], buf, BUFSIZE);
 
          fprintf(stderr, "%s", buf);
-         fprintf(stderr, "Failed: %s\n", p->name);
+         fprintf(stdout, "Failed: make %s\n", p->name);
 
          free(buf);
          return 1;
@@ -306,33 +306,33 @@ int runGccMake(Program *p) {
 
 void printFailure(char *name, int tnum, Failure *fl) {
    if (fl->fail) {
-      fprintf(stderr, "%s test %d failed:", name, tnum);
+      fprintf(stdout, "%s test %d failed:", name, tnum);
       while (fl->fail) {
          if (fl->diff) {
-            fprintf(stderr, " diff failure");
+            fprintf(stdout, " diff failure");
             fl->diff = 0;
          }
          else if (fl->runtime) {
-            fprintf(stderr, " runtime error");
+            fprintf(stdout, " runtime error");
             fl->runtime = 0;
          }
          else {
-            fprintf(stderr, " timeout");
+            fprintf(stdout, " timeout");
             fl->timeout = 0;
          }
 
          if (fl->fail > 1)
-            fprintf(stderr, ",");
+            fprintf(stdout, ",");
 
          --fl->fail;
       }
-      fprintf(stderr, "\n");
+      fprintf(stdout, "\n");
    }
 }
 
 void printSuccess(char *name, int totalFailures, int totalTests) {
    if (!totalFailures)
-      fprintf(stderr, "%s %d of %d tests passed.\n", name, 
+      fprintf(stdout, "%s %d of %d tests passed.\n", name, 
        totalTests, totalTests);
 }
 
@@ -352,7 +352,6 @@ void checkOpenFds(int n) {
    exit(0);
 }
 
-// TODO finish implementing this
 char **buildDiffArgs(char *act, char *exp) {
    char **args = malloc(DEFAULT_SIZE * sizeof(char *));
    char **runner = args;
