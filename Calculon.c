@@ -171,7 +171,7 @@ void runtests(Program *p, Test *tests[], int numTests) {
          int inFd, outFd;
          char outFileK[DEFAULT_SIZE + 2];
          Failure failure = { 0, 0, 0, 0 };
-         
+
          inFd = open(tests[i]->inFile, O_RDONLY);
          sprintf(outFileK, "%s.k", tests[i]->outFile);
          outFd = creat(outFileK, 0644);
@@ -207,7 +207,16 @@ void runtests(Program *p, Test *tests[], int numTests) {
          }
 
          // TODO exec diff here
-         
+         /*
+         cpid = fork();
+         if (cpid < 0)
+            fprintf(stderr, "Error: Something forked up\n");
+         else if (cpid > 0)
+            wait(&status);
+         else {
+            execv(DIFF, buildDiffArgs(
+         }
+         */
 
 
          printFailure(p->name, i, &failure);

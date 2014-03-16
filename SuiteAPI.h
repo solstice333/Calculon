@@ -18,6 +18,7 @@
 #define CP "/bin/cp"
 #define GCC "/usr/bin/gcc"
 #define MAKE "/usr/bin/make"
+#define DIFF "/usr/bin/diff"
 #define OUTPUT_OPT "-o"
 #define W 1
 #define R 0
@@ -110,7 +111,10 @@ void TestPrintContents(Test *t);
 /* Destroys Test |*t| */
 void TestDelete(Test *t);
 
-/* Build an argument list for the SafeRun executable */
+/* Build an argument list for the SafeRun utility, where Program |*p|
+*  contains the program you want SafeRun to execute, Test |*tests[]|
+*  contains all the Test objects associated to Program |*p|, and |testNum|
+*  is the current index of interest in |*tests[]| */
 char **buildSrArgs(Program *p, Test *tests[], int testNum);
 
 /* Makes new directory with name being the parent process id of Calculon
@@ -149,5 +153,16 @@ void printSuccess(char *name, int totalFailures, int totalTests);
 *  silence
 */
 void silence(int fd);
+
+/* This function will check for open file descriptors up to fd |n|, and then
+*  exit immediately. For debugging purposes only.
+*/
+void checkOpenFds(int n);
+
+/* Build an argument list for the diff utility. The program being tested 
+*  redirects its stdout to the actual output file |*act|. Likewise, |*exp| is 
+*  the name of the expected output file to be diff'ed against. 
+*/
+void buildDiffArgs(char *act, char *exp);
 
 #endif

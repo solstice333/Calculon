@@ -356,3 +356,16 @@ void silence(int fd) {
    dup2(garbage[W], fd);
    close(garbage[W]);
 }
+
+void checkOpenFds(int n) {
+   int i;
+   for (i = 0; i < n; i++)
+      if (i != 2 && !close(i) || i == 2)
+         fprintf(stderr, "fd %d is open\n", i);
+
+   exit(0);
+}
+
+// TODO finish implementing this
+void buildDiffArgs(char *act, char *exp) {
+}
