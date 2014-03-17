@@ -169,12 +169,11 @@ void runtests(Program *p, Test *tests[], int numTests) {
       for (i = 0; i < numTests; i++) {
          int status, srRtn, diffRtn;
          int inFd, outFd;
-         char outFileK[DEFAULT_SIZE + 2];
+         char outFileTemp[DEFAULT_SIZE + 2] = "test.output.temp";
          Failure failure = { 0, 0, 0, 0 };
 
          inFd = open(tests[i]->inFile, O_RDONLY);
-         sprintf(outFileK, "%s.k", tests[i]->outFile);
-         outFd = creat(outFileK, 0644);
+         outFd = creat(outFileTemp, 0644);
 
          pid_t cpid = fork();
          if (cpid < 0)
@@ -188,9 +187,9 @@ void runtests(Program *p, Test *tests[], int numTests) {
             dup2(inFd, 0);
             close(inFd);
             dup2(outFd, 1);
+            dup2(outFd, 2);
             close(outFd);
 
-            silence(2);
             execv(SAFERUN, buildSrArgs(p, tests, i));
          }
 
@@ -213,7 +212,7 @@ void runtests(Program *p, Test *tests[], int numTests) {
             wait(&status);
          else { 
             silence(1);
-            execv(DIFF, buildDiffArgs(outFileK, tests[i]->outFile));
+            execv(DIFF, buildDiffArgs(outFileTemp, tests[i]->outFile));
          }
          
          diffRtn = WEXITSTATUS(status);

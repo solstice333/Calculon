@@ -52,6 +52,18 @@ Program *ProgramCreate() {
    return p;
 }
 
+/* checks for existence of |*file| in current directory. If |*file| doesn't
+*  exist, remove the test directory |*dir|, and exit with a value of 1
+*/
+static void fileExistElseExit(char *file, char *dir) {
+   if (!fileExists(file)) {
+      fprintf(stderr,
+       "Could not find required test file '%s'\n", file);
+      rmdir(dir);
+      exit(1);
+   }
+}
+
 void ProgramSetName(Program *p, char *name) {
    strcpy(p->name, name);
 }
@@ -169,6 +181,8 @@ char **buildSrArgs(Program *p, Test *tests[], int testNum) {
    return args;
 }
 
+
+
 char *mkDirMvTests(Program *p, Test *tests[], int numTests) {
    char *path = malloc(DEFAULT_SIZE/2);
    sprintf(path, ".%d", getpid());
@@ -183,19 +197,19 @@ char *mkDirMvTests(Program *p, Test *tests[], int numTests) {
    *runnerFiles++ = CP;
 
    while (*runnerSrc) {
-      if (!fileExists(*runnerSrc)) {
-         fprintf(stderr, 
-          "Could not find required test file '%s'\n", *runnerSrc);
-         rmdir(path);
-         exit(1);
-      }
+      fileExistElseExit(*runnerSrc, path);
       *runnerFiles++ = *runnerSrc++;
    }
 
-   while (*runnerHeader) 
+   while (*runnerHeader) {
+      fileExistElseExit(*runnerHeader, path);
       *runnerFiles++ = *runnerHeader++;
+   }
    for (idx = 0; idx < numTests; idx++) {
+      fileExistElseExit(tests[idx]->inFile, path);
       *runnerFiles++ = tests[idx]->inFile;
+
+      fileExistElseExit(tests[idx]->outFile, path);
       *runnerFiles++ = tests[idx]->outFile;
    }
 
@@ -219,8 +233,10 @@ char *mkDirMvTests(Program *p, Test *tests[], int numTests) {
       fprintf(stderr, "Error: Something forked up\n");
    else if (cpid > 0) 
       wait(NULL);
-   else 
+   else {
+      silence(2);
       execv(CP, files);
+   }
 
    return path;
 }
@@ -251,6 +267,7 @@ int runGccMake(Program *p) {
       close(fd[W]);
       if (!makefileExists())
          close(fd[R]);
+
       wait(&status);
 
       if (WEXITSTATUS(status) == MAKE_FAIL) {
@@ -261,6 +278,15 @@ int runGccMake(Program *p) {
          fprintf(stdout, "Failed: make %s\n", p->name);
 
          free(buf);
+         return 1;
+      }
+      else if (WEXITSTATUS(status) == GCC_FAIL) {
+         fprintf(stderr, "Failed: gcc ");
+
+         char **runnerSrc = p->src;
+         while (*runnerSrc)
+            fprintf(stderr, "%s ", *runnerSrc++);
+         fprintf(stderr, "-o %s\n", p->name);
          return 1;
       }
    }

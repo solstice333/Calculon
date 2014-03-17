@@ -10,7 +10,9 @@
 
 #define DEFAULT_SIZE 128
 #define MULT 10
-#define P30 "-p30"
+
+// TODO change this to "-p30" later
+#define P30 "-p200"
 
 // TODO change this to "/home/grade_cstaley/bin/SafeRun" later
 #define SAFERUN "../SafeRun" 
@@ -25,6 +27,7 @@
 #define BUFSIZE 1024
 #define TARGET 9
 #define MAKE_FAIL 2
+#define GCC_FAIL 1
 
 /* Typedef "struct dirent" with "dirent" */
 typedef struct dirent dirent;

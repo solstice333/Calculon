@@ -5,7 +5,7 @@ vg=false
 limit=$(($(ps -A | wc -l) + 10))
 
 ./cleanAllTests.sh
-make -f mfCalculon all
+make -f mfCalculon rebuild
 echo -e "\n\n"
 
 echo -e "\nTESTA - all 3 tests pass, gcc, one source file\n"
@@ -112,6 +112,82 @@ else
 fi
 ./cleanAllTests.sh
 
+echo -e "\nTEST3\n"
+cp Tests/Suite3/* .
+if $vg; then
+   valgrind ./SafeRun -p$limit ./a.out Suite3.suite
+else
+   ./SafeRun -p$limit ./a.out Suite3.suite > Suite3.out.k
+   echo -e "Return value: $?"
+   diff Suite3.out.k Tests/Suite3.out
+fi
+./cleanAllTests.sh
+
+echo -e "\nTEST4\n"
+cp Tests/Suite4/* .
+if $vg; then
+   valgrind ./SafeRun -p$limit ./a.out Suite4.suite
+else
+   ./SafeRun -p$limit ./a.out Suite4.suite > Suite4.out.k
+   echo -e "Return value: $?"
+   diff Suite4.out.k Tests/Suite4.out
+fi
+./cleanAllTests.sh
+
+echo -ne "\nTEST5 - Forcing redirection of stderr and stdout to file" 
+echo -e " in bash due to inability of piping outer-most SafeRun\n"
+cp Tests/Suite5/* .
+if $vg; then
+   valgrind ./SafeRun -p$limit ./a.out Suite5.suite
+else
+   # Note the redirection of stderr and stdout to file
+   ./SafeRun -p$limit ./a.out Suite5.suite &> Suite5.out.k
+   echo -e "Return value: $?"
+   diff Suite5.out.k Tests/Suite5.out
+fi
+./cleanAllTests.sh
+
+echo -ne "\nTEST6 - Compilation differences due to different gcc versions? "
+echo -ne "Calculon output is the same however. Forcing redirection of "
+echo -ne "stderr and stdout to file in bash. I don't want to pipe gcc "
+echo -e "stderr to the Calculon parent. That's retarded.\n"
+cp Tests/Suite6/* .
+if $vg; then
+   valgrind ./SafeRun -p$limit ./a.out Suite6.suite
+else
+   ./SafeRun -p$limit ./a.out Suite6.suite &> Suite6.out.k
+   echo -e "Return value: $?"
+   diff Suite6.out.k Tests/Suite6.out
+fi
+./cleanAllTests.sh
+
+echo -ne "\nTEST7 - Compilation differences due to different gcc versions? "
+echo -ne "Calculon output is the same however. Forcing redirection of "
+echo -ne "stderr and stdout to file in bash. I don't want to pipe gcc "
+echo -e "stderr to the Calculon parent. That's retarded.\n"
+cp Tests/Suite7/* .
+if $vg; then
+   valgrind ./SafeRun -p$limit ./a.out Suite7.suite
+else
+   ./SafeRun -p$limit ./a.out Suite7.suite &> Suite7.out.k
+   echo -e "Return value: $?"
+   diff Suite7.out.k Tests/Suite7.out
+fi
+./cleanAllTests.sh
+
+echo -ne "\nTEST8 - Compilation differences due to different gcc versions? "
+echo -ne "Calculon output is the same however. Forcing redirection of "
+echo -ne "stderr and stdout to file in bash. I don't want to pipe gcc "
+echo -e "stderr to the Calculon parent. That's retarded.\n"
+cp Tests/Suite8/* .
+if $vg; then
+valgrind ./SafeRun -p$limit ./a.out Suite8.suite
+else
+./SafeRun -p$limit ./a.out Suite8.suite &> Suite8.out.k
+echo -e "Return value: $?"
+diff Suite8.out.k Tests/Suite8.out
+fi
+./cleanAllTests.sh
 
 echo -e "\n\n"
 make -f mfCalculon clean

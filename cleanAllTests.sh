@@ -7,5 +7,3 @@ for i in `seq 1 8`; do
       rm -rf $f
    done
 done
-
-rm -rf Suite*.out.k
