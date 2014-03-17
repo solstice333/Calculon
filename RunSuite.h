@@ -11,11 +11,11 @@
 #define DEFAULT_SIZE 128
 #define MULT 10
 
-// TODO change this to "-p30" later
+// TODO change this when running on vogon
+//#define P30 "-p30"
 #define P30 "-p200"
-
-// TODO change this to "/home/grade_cstaley/bin/SafeRun" later
-#define SAFERUN "../SafeRun" 
+//#define SAFERUN "/home/grade_cstaley/bin/SafeRun"
+#define SAFERUN "../SafeRun"
 
 #define CP "/bin/cp"
 #define GCC "/usr/bin/gcc"
