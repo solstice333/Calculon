@@ -1,0 +1,10 @@
+a.out 3 of 3 tests passed.
+b.out 2 of 2 tests passed.
+c.out 1 of 1 tests passed.
+Failed: make d.out
+e.out test 1 failed: diff failure, runtime error, timeout
+g.out test 2 failed: diff failure
+g.out test 3 failed: diff failure
+a.out test 1 failed: diff failure
+b.out 2 of 2 tests passed.
+c.out test 3 failed: diff failure

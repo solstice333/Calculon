@@ -2,91 +2,91 @@
 
 vg=false
 
+limit=$(($(ps -A | wc -l) + 10))
+
 ./cleanAllTests.sh
-make -f mfCalculon rebuild
 echo -e "\n\n"
 
 echo -e "\nTESTA - all 3 tests pass, gcc, one source file\n"
-cp Tests/aprog/* .
+cp aprog/* .
 if $vg; then
-   valgrind ./a.out SuiteA.suite
+   valgrind ./SafeRun -p$limit ./Calculon SuiteA.suite
 else
-   ./a.out SuiteA.suite
+   ./SafeRun -p$limit ./Calculon SuiteA.suite > outputTests.out
    echo -e "Return value: $?"
 fi
 ./cleanAllTests.sh
 
 echo -e "\nTESTB - all 2 tests pass, gcc, multiple source files\n"
-cp Tests/bprog/* .
+cp bprog/* .
 if $vg; then
-   valgrind ./a.out SuiteB.suite
+   valgrind ./SafeRun -p$limit ./Calculon SuiteB.suite
 else
-   ./a.out SuiteB.suite
+   ./SafeRun -p$limit ./Calculon SuiteB.suite >> outputTests.out 
    echo -e "Return value: $?"
 fi
 ./cleanAllTests.sh
 
 echo -e "\nTESTC - all 1 tests pass, makefile\n"
-cp Tests/cprog/* .
+cp cprog/* .
 if $vg; then
-   valgrind ./a.out SuiteC.suite
+   valgrind ./SafeRun -p$limit ./Calculon SuiteC.suite
 else
-   ./a.out SuiteC.suite
+   ./SafeRun -p$limit ./Calculon SuiteC.suite >> outputTests.out
    echo -e "Return value: $?"
 fi
 ./cleanAllTests.sh
 
 echo -e "\nTESTD - make failure, no target for dependency, bad make\n"
-cp Tests/dprog/* .
+cp dprog/* .
 if $vg; then
-   valgrind ./a.out SuiteD.suite
+   valgrind ./SafeRun -p$limit ./Calculon SuiteD.suite
 else
-   ./a.out SuiteD.suite
+   ./SafeRun -p$limit ./Calculon SuiteD.suite >> outputTests.out
    echo -e "Return value: $?"
 fi
 ./cleanAllTests.sh
 
 echo -ne "\nTESTE - infinite loop, sometimes runtime err, "
 echo -e "sometimes runtime error and timeout\n"
-cp Tests/eprog/* .
+cp eprog/* .
 if $vg; then
-   valgrind ./a.out SuiteE.suite
+   valgrind ./SafeRun -p$limit ./Calculon SuiteE.suite
 else
-   ./a.out SuiteE.suite
+   ./SafeRun -p$limit ./Calculon SuiteE.suite >> outputTests.out
    echo -e "Return value: $?"
 fi
 ./cleanAllTests.sh
 
 echo -ne "\nTESTF - Missing source file. Expect memory leaks here due to "
 echo -e "the hard exit\n"
-cp Tests/fprog/* .
+cp fprog/* .
 if $vg; then
-   valgrind ./a.out SuiteF.suite
+   valgrind ./SafeRun -p$limit ./Calculon SuiteF.suite
 else
-   ./a.out SuiteF.suite
+   ./SafeRun -p$limit ./Calculon SuiteF.suite >> outputTests.out
    echo -e "Return value: $?"
 fi
 ./cleanAllTests.sh
 
 echo -e "\nTESTG - bad diff for test2 and test3\n"
-cp Tests/gprog/* .
+cp gprog/* .
 if $vg; then
-   valgrind ./a.out SuiteG.suite
+   valgrind ./SafeRun -p$limit ./Calculon SuiteG.suite
 else
-   ./a.out SuiteG.suite
+   ./SafeRun -p$limit ./Calculon SuiteG.suite >> outputTests.out
    echo -e "Return value: $?"
 fi
 ./cleanAllTests.sh
 
 echo -e "\nTESTH - multiple tests. Edge cases fail (A - test1, C - test3)\n"
-cp Tests/hprog/* .
+cp hprog/* .
 if $vg; then
-   valgrind ./a.out SuiteH.suite
+   valgrind ./SafeRun -p$limit ./Calculon SuiteH.suite
 else
-   ./a.out SuiteH.suite
+   ./SafeRun -p$limit ./Calculon SuiteH.suite >> outputTests.out
    echo -e "Return value: $?"
 fi
 ./cleanAllTests.sh
 
 echo -e "\n\n"
-make -f mfCalculon clean
