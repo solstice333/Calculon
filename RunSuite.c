@@ -44,14 +44,6 @@ static void printArgsv(char **argsv, char *intromsg) {
    fprintf(stderr, "\n");
 }
 
-Program *ProgramCreate() {
-   Program *p = malloc(sizeof(Program));
-   p->name[0] = '\0';
-   p->src[p->idxSrc = 0] = NULL;
-   p->header[p->idxHeader = 0] = NULL;
-   return p;
-}
-
 /* checks for existence of |*file| in current directory. If |*file| doesn't
 *  exist, remove the test directory |*dir|, and exit with a value of 1
 */
@@ -62,6 +54,14 @@ static void fileExistElseExit(char *file, char *dir) {
       rmdir(dir);
       exit(1);
    }
+}
+
+Program *ProgramCreate() {
+   Program *p = malloc(sizeof(Program));
+   p->name[0] = '\0';
+   p->src[p->idxSrc = 0] = NULL;
+   p->header[p->idxHeader = 0] = NULL;
+   return p;
 }
 
 void ProgramSetName(Program *p, char *name) {
