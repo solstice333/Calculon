@@ -1,7 +1,7 @@
 #!/bin/bash
 
 vg=false
-ignore=true
+ignore=false
 
 limit=$(($(ps -A | wc -l) + 10))
 #limit=30
@@ -107,7 +107,7 @@ cp Tests/Suite1/* .
 if $vg; then
    valgrind ./SafeRun -p$limit ./a.out Suite1.suite
 else
-   ./SafeRun -p$limit ./a.out Suite1.suite > Suite1.out.k
+   ./SafeRun -p$limit ./a.out Suite1.suite &> Suite1.out.k
    echo -e "Return value: $?"
    diff Suite1.out.k Tests/Suite1.out
 fi
@@ -118,7 +118,7 @@ cp Tests/Suite2/* .
 if $vg; then
    valgrind ./SafeRun -p$limit ./a.out Suite2.suite
 else
-   ./SafeRun -p$limit ./a.out Suite2.suite > Suite2.out.k
+   ./SafeRun -p$limit ./a.out Suite2.suite &> Suite2.out.k
    echo -e "Return value: $?"
    diff Suite2.out.k Tests/Suite2.out
 fi
@@ -129,7 +129,7 @@ cp Tests/Suite3/* .
 if $vg; then
    valgrind ./SafeRun -p$limit ./a.out Suite3.suite
 else
-   ./SafeRun -p$limit ./a.out Suite3.suite > Suite3.out.k
+   ./SafeRun -p$limit ./a.out Suite3.suite &> Suite3.out.k
    echo -e "Return value: $?"
    diff Suite3.out.k Tests/Suite3.out
 fi
@@ -140,7 +140,7 @@ cp Tests/Suite4/* .
 if $vg; then
    valgrind ./SafeRun -p$limit ./a.out Suite4.suite
 else
-   ./SafeRun -p$limit ./a.out Suite4.suite > Suite4.out.k
+   ./SafeRun -p$limit ./a.out Suite4.suite &> Suite4.out.k
    echo -e "Return value: $?"
    diff Suite4.out.k Tests/Suite4.out
 fi

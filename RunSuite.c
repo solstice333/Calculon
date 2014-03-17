@@ -256,28 +256,15 @@ void rmDirRmTests(char *path) {
 }
 
 int runGccMake(Program *p) {
-   int fd[2];
-   pipe(fd);   
-
    pid_t cpid = fork();
    if (cpid < 0)
       fprintf(stderr, "Error: Something forked up\n");
    else if (cpid > 0) {
       int status;
-      close(fd[W]);
-      if (!makefileExists())
-         close(fd[R]);
-
       wait(&status);
 
       if (WEXITSTATUS(status) == MAKE_FAIL) {
-         char *buf = calloc(BUFSIZE, sizeof(char));
-         read(fd[R], buf, BUFSIZE);
-
-         fprintf(stderr, "%s", buf);
          fprintf(stdout, "Failed: make %s\n", p->name);
-
-         free(buf);
          return 1;
       }
       else if (WEXITSTATUS(status) == GCC_FAIL) {
@@ -295,16 +282,10 @@ int runGccMake(Program *p) {
 #if DEBUG
          fprintf(stderr, "Running make!\n");
 #endif
-         close(fd[R]);   
-         dup2(fd[W], 2);
-         close(fd[W]);
-
          silence(1);
          execl(MAKE, MAKE, p->name, NULL);
       }
       else {
-         close(fd[W]);
-         close(fd[R]);
 #if DEBUG
          fprintf(stderr, "Running gcc!\n");
 #endif
